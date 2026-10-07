@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\Kost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 Route::get('/', function (Request $request) {
     if ($request->wantsJson()) {
@@ -14,5 +16,9 @@ Route::get('/', function (Request $request) {
         ]);
     }
 
-    return view('welcome');
+    $kosts = Schema::hasTable('kosts')
+        ? Kost::with(['owner', 'primaryImage', 'rooms'])->approved()->latest()->get()
+        : collect();
+
+    return view('welcome', compact('kosts'));
 });
