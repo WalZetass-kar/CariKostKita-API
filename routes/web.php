@@ -1,24 +1,35 @@
 <?php
 
-use App\Models\Kost;
+use App\Http\Controllers\ControlCenterController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 
-Route::get('/', function (Request $request) {
+/*
+|--------------------------------------------------------------------------
+| Web Routes — CariKostKita API Control Center
+|--------------------------------------------------------------------------
+|
+| Interface developer internal untuk monitoring, dokumentasi, testing,
+| dan telemetri request. Bukan landing page publik.
+|
+*/
+
+Route::get('/', function (Request $request, ControlCenterController $controller) {
     if ($request->wantsJson()) {
         return response()->json([
             'success' => true,
             'name' => 'CariKostKita API',
             'version' => '1.0.0',
             'status' => 'online',
+            'documentation' => url('/docs'),
+            'health_check' => url('/api/health'),
             'endpoints' => url('/api'),
         ]);
     }
 
-    $kosts = Schema::hasTable('kosts')
-        ? Kost::with(['owner', 'primaryImage', 'rooms'])->approved()->latest()->get()
-        : collect();
-
-    return view('welcome', compact('kosts'));
+    return app()->call([$controller, 'overview']);
 });
+
+Route::get('/docs', [ControlCenterController::class, 'docs']);
+Route::get('/docs/tester', [ControlCenterController::class, 'tester']);
+Route::get('/docs/logs', [ControlCenterController::class, 'logs']);

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\KostController;
 use App\Http\Controllers\Api\KostImageController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\ApiHealthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/health', ApiHealthController::class);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApiRequestLoggerMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -22,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => RoleMiddleware::class,
+        ]);
+
+        $middleware->api(prepend: [
+            ApiRequestLoggerMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
