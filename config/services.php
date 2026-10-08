@@ -41,4 +41,8 @@ return [
         'bucket' => env('SUPABASE_STORAGE_BUCKET', 'kost-images'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID', '328759693822-gc05nlhkdpd4cp54t0miqm8u3mf6lqtk.apps.googleusercontent.com'),
+    ],
+
 ];

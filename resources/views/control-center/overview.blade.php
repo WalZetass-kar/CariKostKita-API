@@ -181,6 +181,26 @@
                     <div style="font-size: 1.75rem; font-weight: 700; color: var(--text-heading); font-family: var(--font-mono);">{{ $stats['chats'] }}</div>
                     <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 0.25rem;">Chats</div>
                 </div>
+
+                <div style="padding: 1rem; background-color: #f8fafc; border-radius: 6px; border: 1px solid var(--border);">
+                    <div style="font-size: 1.75rem; font-weight: 700; color: var(--text-heading); font-family: var(--font-mono);">{{ $stats['surveys'] }}</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 0.25rem;">Surveys</div>
+                </div>
+
+                <div style="padding: 1rem; background-color: #f8fafc; border-radius: 6px; border: 1px solid var(--border);">
+                    <div style="font-size: 1.75rem; font-weight: 700; color: var(--text-heading); font-family: var(--font-mono);">{{ $stats['reviews'] }}</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 0.25rem;">Reviews</div>
+                </div>
+
+                <div style="padding: 1rem; background-color: #f8fafc; border-radius: 6px; border: 1px solid var(--border);">
+                    <div style="font-size: 1.75rem; font-weight: 700; color: var(--text-heading); font-family: var(--font-mono);">{{ $stats['ads'] }}</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 0.25rem;">Ads</div>
+                </div>
+
+                <div style="padding: 1rem; background-color: #f8fafc; border-radius: 6px; border: 1px solid var(--border);">
+                    <div style="font-size: 1.75rem; font-weight: 700; color: var(--text-heading); font-family: var(--font-mono);">{{ $stats['releases'] }}</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 0.25rem;">Releases</div>
+                </div>
             </div>
         </div>
     </div>

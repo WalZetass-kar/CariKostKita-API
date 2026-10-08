@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,7 +29,20 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'no_hp',
         'avatar',
+        'avatar_url',
+        'bio',
+        'verification_status',
+        'catatan_revisi',
+        'is_active',
+        'ktp_path',
+        'selfie_path',
+        'kepemilikan_path',
+        'pengajuan_at',
+        'auth_provider',
+        'google_id',
+        'fcm_token',
     ];
 
     /**
@@ -51,6 +65,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'pengajuan_at' => 'datetime',
         ];
     }
 
@@ -99,18 +115,70 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function surveyRequests(): HasMany
+    {
+        return $this->hasMany(SurveyRequest::class, 'pencari_id');
+    }
+
+    public function incomingSurveys(): HasMany
+    {
+        return $this->hasMany(SurveyRequest::class, 'owner_id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function blockedUsers(): HasMany
+    {
+        return $this->hasMany(UserBlock::class, 'blocker_id');
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'admin_id');
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'developer'], true);
     }
 
     public function isPemilik(): bool
     {
-        return $this->role === 'pemilik';
+        return in_array($this->role, ['pemilik', 'owner', 'pemilik_kost'], true);
     }
 
     public function isPencari(): bool
     {
-        return $this->role === 'pencari';
+        return in_array($this->role, ['pencari', 'user'], true);
+    }
+
+    public function isModerator(): bool
+    {
+        return $this->role === 'moderator';
+    }
+
+    /**
+     * Provide seamless fallback for no_hp / phone.
+     */
+    protected function noHp(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ?? $this->phone,
+            set: fn ($value) => $value
+        );
+    }
+
+    /**
+     * Provide seamless fallback for avatar_url / avatar.
+     */
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ?? $this->avatar,
+            set: fn ($value) => $value
+        );
     }
 }

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Advertisement;
 use App\Models\ApiLog;
+use App\Models\ApplicationRelease;
 use App\Models\Chat;
 use App\Models\Favorite;
 use App\Models\Kost;
+use App\Models\Review;
 use App\Models\Room;
+use App\Models\SurveyRequest;
 use App\Models\User;
 use App\Services\ApiDocumentationService;
 use App\Services\HealthCheckService;
@@ -22,13 +26,31 @@ class ControlCenterController extends Controller
     {
         $health = $healthService->check();
 
-        $stats = [
-            'users' => User::count(),
-            'kosts' => Kost::count(),
-            'rooms' => Room::count(),
-            'favorites' => Favorite::count(),
-            'chats' => Chat::count(),
-        ];
+        try {
+            $stats = [
+                'users' => User::count(),
+                'kosts' => Kost::count(),
+                'rooms' => Room::count(),
+                'favorites' => Favorite::count(),
+                'chats' => Chat::count(),
+                'surveys' => SurveyRequest::count(),
+                'reviews' => Review::count(),
+                'ads' => Advertisement::count(),
+                'releases' => ApplicationRelease::count(),
+            ];
+        } catch (\Throwable $e) {
+            $stats = [
+                'users' => 0,
+                'kosts' => 0,
+                'rooms' => 0,
+                'favorites' => 0,
+                'chats' => 0,
+                'surveys' => 0,
+                'reviews' => 0,
+                'ads' => 0,
+                'releases' => 0,
+            ];
+        }
 
         $groupedRoutes = $docService->getGroupedRoutes();
         $totalEndpoints = array_reduce($groupedRoutes, fn ($carry, $group) => $carry + count($group), 0);

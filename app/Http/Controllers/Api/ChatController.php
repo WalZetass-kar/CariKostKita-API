@@ -23,7 +23,7 @@ class ChatController extends Controller
         $userId = $request->user()->id;
         $perPage = min(max($request->integer('per_page', 20), 1), 50);
 
-        $chats = Chat::with(['user', 'owner', 'kost', 'latestMessage'])
+        $chats = Chat::with(['user', 'pencari', 'owner', 'kost', 'latestMessage'])
             ->where(function ($q) use ($userId) {
                 $q->where('user_id', $userId)
                     ->orWhere('owner_id', $userId);
@@ -63,14 +63,20 @@ class ChatController extends Controller
         ]);
 
         if ($request->filled('message')) {
+            $msgContent = $request->input('message');
             $chat->messages()->create([
                 'sender_id' => $user->id,
-                'message' => $request->input('message'),
+                'message' => $msgContent,
             ]);
-            $chat->touch();
+
+            $chat->update([
+                'last_message' => $msgContent,
+                'last_message_at' => now(),
+                'unread_count_owner' => $chat->unread_count_owner + 1,
+            ]);
         }
 
-        $chat->load(['user', 'owner', 'kost', 'latestMessage']);
+        $chat->load(['user', 'pencari', 'owner', 'kost', 'latestMessage']);
 
         return $this->successResponse(new ChatResource($chat), 'Percakapan berhasil dimulai', 201);
     }
@@ -89,6 +95,13 @@ class ChatController extends Controller
             ->where('sender_id', '!=', $user->id)
             ->where('is_read', false)
             ->update(['is_read' => true]);
+
+        // Reset unread counter for current user
+        if ($user->id === $chat->owner_id) {
+            $chat->update(['unread_count_owner' => 0]);
+        } else {
+            $chat->update(['unread_count_user' => 0]);
+        }
 
         $perPage = min(max($request->integer('per_page', 30), 1), 100);
 
@@ -117,14 +130,51 @@ class ChatController extends Controller
     {
         Gate::authorize('sendMessage', $chat);
 
+        $user = $request->user();
+        $messageContent = $request->validated()['message'];
+
         $message = $chat->messages()->create([
-            'sender_id' => $request->user()->id,
-            'message' => $request->validated()['message'],
+            'sender_id' => $user->id,
+            'message' => $messageContent,
         ]);
 
-        $chat->touch();
+        $updates = [
+            'last_message' => $messageContent,
+            'last_message_at' => now(),
+        ];
+
+        if ($user->id === $chat->owner_id) {
+            $updates['unread_count_user'] = $chat->unread_count_user + 1;
+        } else {
+            $updates['unread_count_owner'] = $chat->unread_count_owner + 1;
+        }
+
+        $chat->update($updates);
         $message->load('sender');
 
         return $this->successResponse(new MessageResource($message), 'Pesan berhasil dikirim', 201);
+    }
+
+    /**
+     * Mark all messages in chat as read explicitly.
+     */
+    public function markAsRead(Request $request, Chat $chat): JsonResponse
+    {
+        Gate::authorize('view', $chat);
+
+        $user = $request->user();
+
+        $chat->messages()
+            ->where('sender_id', '!=', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        if ($user->id === $chat->owner_id) {
+            $chat->update(['unread_count_owner' => 0]);
+        } else {
+            $chat->update(['unread_count_user' => 0]);
+        }
+
+        return $this->successResponse(null, 'Pesan berhasil ditandai sudah dibaca');
     }
 }

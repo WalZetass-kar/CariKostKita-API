@@ -189,4 +189,69 @@ class AuthTest extends TestCase
                 'message' => 'Unauthenticated',
             ]);
     }
+
+    public function test_user_can_login_with_google_successfully(): void
+    {
+        $payload = [
+            'email' => 'googleuser@gmail.com',
+            'name' => 'Google User Demo',
+            'google_id' => 'google_sub_123456',
+            'avatar_url' => 'https://example.com/avatar.jpg',
+        ];
+
+        $response = $this->postJson('/api/auth/google', $payload);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Login Google berhasil',
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'token',
+                    'user' => [
+                        'id',
+                        'name',
+                        'email',
+                        'role',
+                    ],
+                ],
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'googleuser@gmail.com',
+            'google_id' => 'google_sub_123456',
+            'auth_provider' => 'google',
+        ]);
+    }
+
+    public function test_existing_user_links_google_account_on_google_login(): void
+    {
+        $existing = User::factory()->create([
+            'email' => 'existing@gmail.com',
+            'auth_provider' => 'email',
+        ]);
+
+        $payload = [
+            'email' => 'existing@gmail.com',
+            'google_id' => 'google_sub_789',
+        ];
+
+        $response = $this->postJson('/api/google-login', $payload);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $existing->id,
+            'google_id' => 'google_sub_789',
+            'auth_provider' => 'google',
+        ]);
+    }
+
+    public function test_google_login_validation_failure(): void
+    {
+        $response = $this->postJson('/api/auth/google', []);
+
+        $response->assertStatus(422);
+    }
 }

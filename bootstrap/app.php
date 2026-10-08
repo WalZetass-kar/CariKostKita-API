@@ -25,6 +25,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'auth/*',
+            'rest/*',
+            'storage/*',
+            'realtime/*',
+            'api/*',
+        ]);
+
         $middleware->api(prepend: [
             ApiRequestLoggerMiddleware::class,
         ]);
